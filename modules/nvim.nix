@@ -20,6 +20,7 @@
     vimPlugins.nvim-treesitter
     vimPlugins.lualine-nvim
     vimPlugins.copilot-vim
+    vimPlugins.dracula-vim
     {
       plugin = vimPlugins.neoformat;
       config = ''
@@ -28,4 +29,7 @@
       '';
     }
   ];
+  extraConfig = ''
+    colorscheme dracula
+  '';
 }
