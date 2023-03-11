@@ -10,7 +10,6 @@ in
 
   home.packages = [
     pkgs.gnumake
-    pkgs.git
     pkgs.ripgrep
     pkgs.direnv
     pkgs.autojump
@@ -21,4 +20,6 @@ in
 
   programs.git = import ./modules/git.nix;
   programs.neovim = import ./modules/nvim.nix { inherit pkgs; };
+  programs.kitty = import ./modules/kitty.nix;
+  programs.zsh = import ./modules/zsh.nix;
 }
