@@ -6,7 +6,7 @@ in
 {
   home.username = username;
   home.homeDirectory = "/Users/${username}";
-  home.stateVersion = "22.11";
+  home.stateVersion = "23.05";
 
   home.packages = [
     pkgs.gnumake
@@ -20,6 +20,5 @@ in
 
   programs.git = import ./modules/git.nix;
   programs.neovim = import ./modules/nvim.nix { inherit pkgs; };
-  programs.kitty = import ./modules/kitty.nix;
   programs.zsh = import ./modules/zsh.nix;
 }
