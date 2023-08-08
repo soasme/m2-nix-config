@@ -2,9 +2,11 @@
   enable = true;
   enableAutosuggestions = true;
   enableCompletion = true;
-  enableSyntaxHighlighting = true;
   enableVteIntegration = true;
   autocd = true;
+  syntaxHighlighting = {
+    enable = true;
+  };
   oh-my-zsh = {
     enable = true;
     theme = "random";
