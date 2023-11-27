@@ -21,4 +21,5 @@ in
   programs.git = import ./modules/git.nix;
   programs.neovim = import ./modules/nvim.nix { inherit pkgs; };
   programs.zsh = import ./modules/zsh.nix;
+  programs.tmux = import ./modules/tmux.nix;
 }
