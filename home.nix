@@ -16,6 +16,8 @@ in
     pkgs.jq
     pkgs.rsync
     pkgs.keepassxc
+    pkgs.iterm2
+    # not supported: pkgs.godot, pkgs.krita, pkgs.obs-studio
   ];
 
   programs.git = import ./modules/git.nix;
