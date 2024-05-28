@@ -6,7 +6,7 @@ in
 {
   home.username = username;
   home.homeDirectory = "/Users/${username}";
-  home.stateVersion = "23.11";
+  home.stateVersion = "24.05";
 
   home.packages = [
     pkgs.gnumake

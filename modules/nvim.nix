@@ -7,7 +7,7 @@
   withPython3 = true;
   extraPackages = with pkgs; [
     gcc
-    nixfmt
+    nixfmt-classic
     black
     nodejs
     nodePackages.prettier
