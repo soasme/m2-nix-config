@@ -116,7 +116,7 @@ in {
     vimPlugins.plenary-nvim # required by avante-nvim
     vimPlugins.nui-nvim # required by avante-nvim
     vimPlugins.nvim-web-devicons # required by avante-nvim
-    vimPlugins.render-markdown # required by avante-nvim
+    vimPlugins.render-markdown-nvim # required by avante-nvim
     vimPlugins.copilot-lua # optional, required by avante-nvim if provider is copilot
     avante-nvim
   ];
