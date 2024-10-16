@@ -1,89 +1,6 @@
 { pkgs }:
 
-let
-  fromGitHub = owner: repo: rev: sha256:
-    pkgs.vimUtils.buildVimPlugin {
-      name = "${repo}";
-      src = pkgs.fetchFromGitHub {
-        inherit owner repo rev sha256;
-      };
-    };
-    
-  # nix-prefetch-url --unpack --print-path https://github.com/yetone/avante.nvim/archive/${rev}.zip
-  avante-nvim = fromGitHub "yetone" "avante.nvim" "v0.0.2" "1cf78bj82k74lyvgx7ayw6ph9sm2i82mchk18c2k6037mma0nhm7";
-
-  avante-nvim-config = ''
-    require'avante_lib'.load()
-
-    require'avante'.setup {
-      ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-      provider = "claude", -- Recommend using Claude
-      claude = {
-        endpoint = "https://api.anthropic.com",
-        model = "claude-3-5-sonnet-20240620",
-        temperature = 0,
-        max_tokens = 4096,
-      },
-      behaviour = {
-        auto_suggestions = false, -- Experimental stage
-        auto_set_highlight_group = true,
-        auto_set_keymaps = true,
-        auto_apply_diff_after_generation = false,
-        support_paste_from_clipboard = false,
-      },
-      mappings = {
-        --- @class AvanteConflictMappings
-        diff = {
-          ours = "co",
-          theirs = "ct",
-          all_theirs = "ca",
-          both = "cb",
-          cursor = "cc",
-          next = "]x",
-          prev = "[x",
-        },
-        suggestion = {
-          accept = "<M-l>",
-          next = "<M-]>",
-          prev = "<M-[>",
-          dismiss = "<C-]>",
-        },
-        jump = {
-          next = "]]",
-          prev = "[[",
-        },
-        submit = {
-          normal = "<CR>",
-          insert = "<C-s>",
-        },
-      },
-      hints = { enabled = true },
-      windows = {
-        ---@type "right" | "left" | "top" | "bottom"
-        position = "right", -- the position of the sidebar
-        wrap = true, -- similar to vim.o.wrap
-        width = 30, -- default % based on available width
-        sidebar_header = {
-          align = "center", -- left, center, right for title
-          rounded = true,
-        },
-      },
-      highlights = {
-        ---@type AvanteConflictHighlights
-        diff = {
-          current = "DiffText",
-          incoming = "DiffAdd",
-        },
-      },
-      --- @class AvanteConflictUserConfig
-      diff = {
-        autojump = true,
-        ---@type string | fun(): any
-        list_opener = "copen",
-      },
-    }
-  '';
-in {
+{
   enable = true;
   viAlias = true;
   vimAlias = true;
@@ -95,35 +12,90 @@ in {
     nodejs
     nodePackages.prettier
   ];
-  plugins = with pkgs; [
-    vimPlugins.vim-nix
-    vimPlugins.vim-fugitive
-    vimPlugins.vim-commentary
-    vimPlugins.fzf-vim
-    vimPlugins.nvim-treesitter
-    vimPlugins.lualine-nvim
-    vimPlugins.copilot-vim
-    vimPlugins.dracula-vim
-    {
-      plugin = vimPlugins.neoformat;
-      config = ''
-        let g:neoformat_enabled_nix = ["nixfmt"]
-        let g:neoformat_enabled_python = ["black"]
-      '';
-    } 
-
-    vimPlugins.dressing-nvim # required by avante-nvim
-    vimPlugins.plenary-nvim # required by avante-nvim
-    vimPlugins.nui-nvim # required by avante-nvim
-    vimPlugins.nvim-web-devicons # required by avante-nvim
-    vimPlugins.render-markdown-nvim # required by avante-nvim
-    vimPlugins.copilot-lua # optional, required by avante-nvim if provider is copilot
-    avante-nvim
+  plugins = with pkgs.vimPlugins; [
+    lazy-nvim
   ];
   extraConfig = ''
-    colorscheme dracula
+    set relativenumber
 
     lua <<EOF
-    ${avante-nvim-config}
+    -- Bootstrap lazy.nvim
+    local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+    if not (vim.uv or vim.loop).fs_stat(lazypath) then
+      local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+      local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+      if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+          { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+          { out, "WarningMsg" },
+          { "\nPress any key to exit..." },
+        }, true, {})
+        vim.fn.getchar()
+        os.exit(1)
+      end
+    end
+    vim.opt.rtp:prepend(lazypath)
+    
+    vim.g.mapleader = " "
+    vim.g.maplocalleader = "\\"
+    
+    require("lazy").setup({
+      install = { colorscheme = { "habamax" } },
+      checker = { enabled = true },
+      spec = {
+        { "tpope/vim-fugitive" },
+        { "tpope/vim-commentary" },
+        { "junegunn/fzf.vim" },
+        { "nvim-lualine/lualine.nvim" },
+        { "github/copilot.vim" },
+        { "dracula/vim", name = "dracula" },
+        { "LnL7/vim-nix" },
+        {
+          "sbdchd/neoformat",
+          config = function()
+            vim.g.neoformat_enabled_nix = {"nixfmt"}
+            vim.g.neoformat_enabled_python = {"black"}
+          end,
+        },
+        {
+          "yetone/avante.nvim",
+          event = "VeryLazy",
+          lazy = false,
+          version = false,
+          opts = {},
+          build = "make",
+          dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+            "stevearc/dressing.nvim",
+            "nvim-lua/plenary.nvim",
+            "MunifTanjim/nui.nvim",
+            "nvim-tree/nvim-web-devicons",
+            "zbirenbaum/copilot.lua",
+            {
+              "HakonHarnes/img-clip.nvim",
+              event = "VeryLazy",
+              opts = {
+                default = {
+                  embed_image_as_base64 = false,
+                  prompt_for_file_name = false,
+                  drag_and_drop = {
+                    insert_mode = true,
+                  },
+                  use_absolute_path = true,
+                },
+              },
+            },
+            {
+              'MeanderingProgrammer/render-markdown.nvim',
+              opts = {
+                file_types = { "markdown", "Avante" },
+              },
+              ft = { "markdown", "Avante" },
+            },
+          },
+        }
+      },
+    })
+    EOF
   '';
 }
